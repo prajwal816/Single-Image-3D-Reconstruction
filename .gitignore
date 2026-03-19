@@ -1,0 +1,37 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Experiments & outputs
+experiments/
+data/
+*.pth
+*.ckpt
+
+# Logs
+*.log
+tensorboard/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
