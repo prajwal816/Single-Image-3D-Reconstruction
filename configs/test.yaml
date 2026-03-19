@@ -1,0 +1,68 @@
+# ============================================================
+# Test / Quick-Run Configuration (small dataset, 2 epochs)
+# ============================================================
+
+experiment:
+  name: "test_run"
+  seed: 42
+  device: "cpu"
+  num_workers: 0
+  output_dir: "experiments"
+
+dataset:
+  name: "simulated_shapenet"
+  num_train_samples: 200
+  num_val_samples: 50
+  num_test_samples: 50
+  num_points: 256
+  image_size: 128
+  categories:
+    - "cube"
+    - "sphere"
+    - "cylinder"
+  augmentation:
+    color_jitter: false
+    random_crop: false
+    point_jitter: 0.0
+    random_rotation: false
+
+model:
+  encoder:
+    backbone: "resnet18"
+    pretrained: false
+    latent_dim: 128
+  decoder:
+    hidden_dims: [128, 128]
+    num_points: 256
+    activation: "relu"
+    use_batch_norm: true
+
+training:
+  epochs: 2
+  batch_size: 16
+  learning_rate: 0.001
+  weight_decay: 0.0
+  optimizer: "adam"
+  scheduler:
+    type: "cosine"
+    min_lr: 0.0001
+  gradient_clip: 1.0
+  checkpoint_interval: 1
+  log_interval: 5
+  val_interval: 1
+
+loss:
+  type: "chamfer"
+  reduction: "mean"
+
+evaluation:
+  iou_resolution: 16
+  completeness_threshold: 0.05
+  num_visualization_samples: 4
+
+explainability:
+  method: "gradient"
+  num_background_samples: 10
+  num_explain_samples: 2
+  occlusion_patch_size: 16
+  occlusion_stride: 8

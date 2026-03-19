@@ -1,0 +1,78 @@
+# ============================================================
+# Single-Image 3D Reconstruction — Default Configuration
+# ============================================================
+
+experiment:
+  name: "shapenet_reconstruction_v1"
+  seed: 42
+  device: "cuda"            # "cuda" or "cpu"
+  num_workers: 4
+  output_dir: "experiments"
+
+# ---- Dataset ------------------------------------------------
+dataset:
+  name: "simulated_shapenet"
+  num_train_samples: 50000
+  num_val_samples: 5000
+  num_test_samples: 5000
+  num_points: 1024           # points per cloud
+  image_size: 224
+  categories:
+    - "cube"
+    - "sphere"
+    - "cylinder"
+    - "cone"
+    - "torus"
+  augmentation:
+    color_jitter: true
+    random_crop: true
+    point_jitter: 0.02
+    random_rotation: true
+
+# ---- Model --------------------------------------------------
+model:
+  encoder:
+    backbone: "resnet18"
+    pretrained: true
+    latent_dim: 512
+  decoder:
+    hidden_dims: [512, 512, 256]
+    num_points: 1024
+    activation: "relu"
+    use_batch_norm: true
+
+# ---- Training -----------------------------------------------
+training:
+  epochs: 100
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  optimizer: "adam"
+  scheduler:
+    type: "cosine"           # "cosine" | "step" | "plateau"
+    step_size: 30
+    gamma: 0.1
+    min_lr: 0.000001
+  gradient_clip: 1.0
+  checkpoint_interval: 10
+  log_interval: 50
+  val_interval: 1
+
+# ---- Loss ---------------------------------------------------
+loss:
+  type: "chamfer"
+  reduction: "mean"
+
+# ---- Evaluation ---------------------------------------------
+evaluation:
+  iou_resolution: 32
+  completeness_threshold: 0.05
+  num_visualization_samples: 16
+
+# ---- Explainability -----------------------------------------
+explainability:
+  method: "shap"             # "shap" | "gradient" | "occlusion"
+  num_background_samples: 50
+  num_explain_samples: 10
+  occlusion_patch_size: 16
+  occlusion_stride: 8
