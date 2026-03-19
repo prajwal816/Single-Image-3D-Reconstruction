@@ -4,6 +4,7 @@ Evaluator — runs full evaluation on a dataset split and aggregates metrics.
 
 import os
 import json
+import logging
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -12,6 +13,8 @@ from collections import defaultdict
 from tqdm import tqdm
 
 from .metrics import compute_chamfer_distance, compute_iou, compute_reconstruction_completeness
+
+logger = logging.getLogger(__name__)
 
 
 class Evaluator:
@@ -135,27 +138,30 @@ class Evaluator:
         os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
         with open(output_path, "w") as f:
             json.dump(compact, f, indent=2)
-        print(f"Results saved to {output_path}")
+        logger.info("Results saved to %s", output_path)
 
     @staticmethod
     def print_results(results: Dict):
         """Pretty-print evaluation results."""
-        print("\n" + "=" * 60)
-        print("EVALUATION RESULTS")
-        print("=" * 60)
+        lines = []
+        lines.append("\n" + "=" * 60)
+        lines.append("EVALUATION RESULTS")
+        lines.append("=" * 60)
 
         overall = results["overall"]
-        print(f"\nOverall ({overall['num_samples']} samples):")
-        print(f"  Chamfer Distance : {overall['chamfer_distance']:.6f}")
-        print(f"  IoU              : {overall['iou']:.4f}")
-        print(f"  Completeness     : {overall['completeness']:.4f}")
+        lines.append(f"\nOverall ({overall['num_samples']} samples):")
+        lines.append(f"  Chamfer Distance : {overall['chamfer_distance']:.6f}")
+        lines.append(f"  IoU              : {overall['iou']:.4f}")
+        lines.append(f"  Completeness     : {overall['completeness']:.4f}")
 
-        print(f"\nPer-Category:")
-        print(f"  {'Category':<15} {'CD':>10} {'IoU':>8} {'Comp':>8} {'N':>6}")
-        print(f"  {'-' * 50}")
+        lines.append(f"\nPer-Category:")
+        lines.append(f"  {'Category':<15} {'CD':>10} {'IoU':>8} {'Comp':>8} {'N':>6}")
+        lines.append(f"  {'-' * 50}")
         for cat, m in sorted(results["per_category"].items()):
-            print(f"  {cat:<15} {m['chamfer_distance']:>10.6f} "
-                  f"{m['iou']:>8.4f} {m['completeness']:>8.4f} "
-                  f"{m['num_samples']:>6}")
-
-        print("=" * 60)
+            lines.append(
+                f"  {cat:<15} {m['chamfer_distance']:>10.6f} "
+                f"{m['iou']:>8.4f} {m['completeness']:>8.4f} "
+                f"{m['num_samples']:>6}"
+            )
+        lines.append("=" * 60)
+        logger.info("\n".join(lines))
