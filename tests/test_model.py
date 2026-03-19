@@ -20,12 +20,14 @@ class TestImageEncoder:
 
     def test_default_latent_dim(self):
         enc = ImageEncoder(backbone="resnet18", pretrained=False)
+        enc.eval()
         x = torch.randn(1, 3, 224, 224)
         out = enc(x)
         assert out.shape == (1, 512)
 
     def test_feature_maps(self):
         enc = ImageEncoder(backbone="resnet18", pretrained=False, latent_dim=128)
+        enc.eval()
         x = torch.randn(1, 3, 224, 224)
         feat = enc.get_feature_maps(x)
         assert feat.ndim == 4
@@ -83,6 +85,7 @@ class TestReconstructionNet:
             encoder_cfg={"backbone": "resnet18", "pretrained": False, "latent_dim": 64},
             decoder_cfg={"hidden_dims": [64], "num_points": 128},
         )
+        model.eval()
         x = torch.randn(1, 3, 64, 64)
         latent = model.encode(x)
         assert latent.shape == (1, 64)
