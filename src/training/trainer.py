@@ -4,6 +4,7 @@ Trainer — full training loop with validation, checkpointing, and logging.
 
 import os
 import time
+import logging
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -11,6 +12,8 @@ from typing import Dict, Optional
 from tqdm import tqdm
 
 from .experiment import ExperimentTracker
+
+logger = logging.getLogger(__name__)
 
 
 class Trainer:
@@ -126,11 +129,11 @@ class Trainer:
                 self.tracker.log_epoch(epoch, epoch_metrics)
 
             val_loss_str = f"{val_loss:.6f}" if val_loss is not None else "N/A"
-            print(f"Epoch {epoch + 1}/{num_epochs} | "
-                  f"Train Loss: {train_loss:.6f} | "
-                  f"Val Loss: {val_loss_str:>10} | "
-                  f"LR: {self.optimizer.param_groups[0]['lr']:.2e} | "
-                  f"Time: {epoch_time:.1f}s")
+            logger.info(
+                "Epoch %d/%d | Train Loss: %.6f | Val Loss: %s | LR: %.2e | Time: %.1fs",
+                epoch + 1, num_epochs, train_loss, val_loss_str,
+                self.optimizer.param_groups[0]["lr"], epoch_time,
+            )
 
         # Final checkpoint
         self._save_checkpoint(num_epochs - 1, is_best=False, suffix="final")
@@ -248,5 +251,7 @@ class Trainer:
         if self.scheduler is not None and "scheduler_state_dict" in checkpoint:
             self.scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
 
-        print(f"Resumed from epoch {self.start_epoch}, "
-              f"global_step {self.global_step}")
+        logger.info(
+            "Resumed from epoch %d, global_step %d",
+            self.start_epoch, self.global_step,
+        )
