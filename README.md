@@ -82,8 +82,13 @@ The dataset procedurally generates paired **(RGB image, 3D point cloud)** sample
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/Single-Image-3D-Reconstruction.git
+git clone https://github.com/prajwal816/Single-Image-3D-Reconstruction.git
 cd Single-Image-3D-Reconstruction
+
+# Option 1: pip install (recommended)
+pip install -e ".[dev]"
+
+# Option 2: requirements only
 pip install -r requirements.txt
 ```
 
@@ -91,6 +96,14 @@ pip install -r requirements.txt
 
 ```bash
 python train.py --config configs/test.yaml
+```
+
+### 📓 Interactive Notebook
+
+For a guided walkthrough of the full pipeline (dataset → training → evaluation → explainability → latent space analysis):
+
+```bash
+jupyter notebook notebooks/demo.ipynb
 ```
 
 ---
@@ -261,9 +274,11 @@ Single-Image-3D-Reconstruction/
 │   ├── visualization/
 │   │   ├── point_cloud_viz.py     # 3D scatter plots
 │   │   └── training_viz.py       # Loss & LR curves
-│   └── explainability/
-│       ├── shap_analysis.py       # SHAP attribution
-│       └── feature_importance.py  # Gradient saliency + occlusion
+│   ├── explainability/
+│   │   ├── shap_analysis.py       # SHAP attribution
+│   │   └── feature_importance.py  # Gradient saliency + occlusion
+│   └── utils/
+│       └── logging.py             # Centralized logging config
 ├── configs/
 │   ├── default.yaml               # Full training config
 │   └── test.yaml                  # Quick test config
@@ -272,11 +287,17 @@ Single-Image-3D-Reconstruction/
 │   ├── test_model.py
 │   ├── test_losses.py
 │   └── test_metrics.py
+├── notebooks/
+│   └── demo.ipynb                 # Interactive pipeline walkthrough
+├── data/                          # Generated datasets
+├── experiments/                   # Training outputs
 ├── train.py                       # Training entry point
 ├── evaluate.py                    # Evaluation entry point
 ├── explain.py                     # Explainability entry point
 ├── visualize.py                   # Visualization entry point
+├── pyproject.toml                 # Pip-installable packaging
 ├── requirements.txt
+├── LICENSE
 └── README.md
 ```
 
