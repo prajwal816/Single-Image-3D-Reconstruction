@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "single-image-3d-reconstruction"
+version = "1.0.0"
+description = "Deep learning pipeline for single-image 3D shape reconstruction using a ResNet encoder and MLP decoder"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Prajwal"},
+]
+keywords = ["deep-learning", "3d-reconstruction", "point-cloud", "computer-vision", "pytorch"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+    "trimesh>=3.21.0",
+    "open3d>=0.17.0",
+    "shap>=0.42.0",
+    "pyyaml>=6.0",
+    "tensorboard>=2.13.0",
+    "tqdm>=4.65.0",
+    "Pillow>=9.5.0",
+    "scikit-learn>=1.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.3.0",
+    "jupyter>=1.0.0",
+    "ipywidgets>=8.0.0",
+]
+
+[project.scripts]
+recon-train = "train:main"
+recon-eval = "evaluate:main"
+recon-explain = "explain:main"
+recon-visualize = "visualize:main"
+
+[project.urls]
+Repository = "https://github.com/prajwal816/Single-Image-3D-Reconstruction"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
