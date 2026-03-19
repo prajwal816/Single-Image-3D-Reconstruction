@@ -125,9 +125,10 @@ class Trainer:
             if self.tracker is not None:
                 self.tracker.log_epoch(epoch, epoch_metrics)
 
+            val_loss_str = f"{val_loss:.6f}" if val_loss is not None else "N/A"
             print(f"Epoch {epoch + 1}/{num_epochs} | "
                   f"Train Loss: {train_loss:.6f} | "
-                  f"Val Loss: {val_loss:.6f if val_loss else 'N/A':>10} | "
+                  f"Val Loss: {val_loss_str:>10} | "
                   f"LR: {self.optimizer.param_groups[0]['lr']:.2e} | "
                   f"Time: {epoch_time:.1f}s")
 
