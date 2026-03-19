@@ -9,11 +9,13 @@ Usage:
 import argparse
 import os
 import sys
+import logging
 import yaml
 import torch
 import numpy as np
 from torch.utils.data import DataLoader
 
+from src.utils.logging import setup_logging, get_logger
 from src.datasets.shapenet_simulated import SimulatedShapeNetDataset
 from src.datasets.transforms import ImageTransforms, PointCloudTransforms
 from src.models.reconstruction_net import SingleImageReconstructionNet
@@ -21,6 +23,8 @@ from src.models.losses import ChamferDistanceLoss
 from src.training.trainer import Trainer
 from src.training.experiment import ExperimentTracker
 from src.visualization.training_viz import TrainingVisualizer
+
+logger = get_logger(__name__)
 
 
 def load_config(config_path: str) -> dict:
@@ -147,6 +151,11 @@ def main():
     cfg = load_config(args.config)
     exp_cfg = cfg["experiment"]
 
+    # Setup logging (file log goes into experiment dir)
+    log_dir = os.path.join(exp_cfg["output_dir"], exp_cfg["name"])
+    os.makedirs(log_dir, exist_ok=True)
+    setup_logging(level="INFO", log_file=os.path.join(log_dir, "training.log"))
+
     # Seed
     seed = exp_cfg["seed"]
     torch.manual_seed(seed)
@@ -156,19 +165,19 @@ def main():
 
     device = exp_cfg["device"]
     if device == "cuda" and not torch.cuda.is_available():
-        print("CUDA not available, using CPU")
+        logger.warning("CUDA not available, falling back to CPU")
         device = "cpu"
 
-    print("=" * 60)
-    print("Single-Image 3D Reconstruction — Training")
-    print("=" * 60)
-    print(f"Experiment: {exp_cfg['name']}")
-    print(f"Device:     {device}")
+    logger.info("=" * 60)
+    logger.info("Single-Image 3D Reconstruction — Training")
+    logger.info("=" * 60)
+    logger.info("Experiment: %s", exp_cfg["name"])
+    logger.info("Device:     %s", device)
 
     # Build components
     train_ds, val_ds = build_datasets(cfg)
-    print(f"Train samples: {len(train_ds)}, Val samples: {len(val_ds)}")
-    print(f"Categories: {train_ds.get_categories()}")
+    logger.info("Train samples: %d, Val samples: %d", len(train_ds), len(val_ds))
+    logger.info("Categories: %s", train_ds.get_categories())
 
     train_loader = DataLoader(
         train_ds, batch_size=cfg["training"]["batch_size"],
@@ -183,9 +192,12 @@ def main():
 
     model = build_model(cfg)
     param_counts = model.get_num_params()
-    print(f"Model parameters: {param_counts['total']:,} "
-          f"(encoder: {param_counts['encoder']:,}, "
-          f"decoder: {param_counts['decoder']:,})")
+    logger.info(
+        "Model parameters: %s (encoder: %s, decoder: %s)",
+        f"{param_counts['total']:,}",
+        f"{param_counts['encoder']:,}",
+        f"{param_counts['decoder']:,}",
+    )
 
     criterion = ChamferDistanceLoss(reduction=cfg["loss"]["reduction"])
     optimizer, scheduler = build_optimizer(model, cfg)
@@ -213,7 +225,7 @@ def main():
         trainer.load_checkpoint(args.resume)
 
     # Train
-    print(f"\nStarting training for {cfg['training']['epochs']} epochs...\n")
+    logger.info("Starting training for %d epochs...", cfg["training"]["epochs"])
     history = trainer.train(
         train_loader, val_loader, cfg["training"]["epochs"]
     )
@@ -224,8 +236,8 @@ def main():
     TrainingVisualizer.plot_from_history(
         history, save_path=os.path.join(viz_dir, "training_curves.png")
     )
-    print(f"\nTraining curves saved to {viz_dir}")
-    print("Training complete!")
+    logger.info("Training curves saved to %s", viz_dir)
+    logger.info("Training complete!")
 
 
 if __name__ == "__main__":
